@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,19 @@ const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormPr
     startTime: initialData?.startTime || event?.startTime || '09:00',
     endTime: initialData?.endTime || event?.endTime || '10:00',
   });
+
+  // Update form data when initialData changes (from chatbot)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        title: initialData.title || prev.title,
+        startDate: initialData.startDate || prev.startDate,
+        startTime: initialData.startTime || prev.startTime,
+        endTime: initialData.endTime || prev.endTime,
+      }));
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
