@@ -16,6 +16,7 @@ interface ChatbotProps {
     startDate: Date;
     startTime: string;
     endTime: string;
+    location?: string;
   }) => void;
 }
 
@@ -26,12 +27,13 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const [conversationState, setConversationState] = useState<{
-    step: 'greeting' | 'type' | 'title' | 'date' | 'startTime' | 'endTime' | 'complete';
+    step: 'greeting' | 'type' | 'title' | 'date' | 'startTime' | 'endTime' | 'location' | 'complete';
     type?: 'event' | 'task' | 'birthday';
     title?: string;
     date?: string;
     startTime?: string;
     endTime?: string;
+    location?: string;
   }>({ step: 'greeting' });
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,8 +48,9 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
 
       recognitionInstance.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        setInputText(transcript);
+        addUserMessage(transcript);
         processUserInput(transcript);
+        setInputText('');
       };
 
       recognitionInstance.onerror = (event: any) => {
@@ -93,7 +96,6 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
 
   const processUserInput = (input: string) => {
     const lowerInput = input.toLowerCase();
-    addUserMessage(input);
 
     switch (conversationState.step) {
       case 'greeting':
@@ -158,28 +160,41 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
       case 'endTime':
         const endTime = parseTime(input);
         if (endTime) {
-          setConversationState({ ...conversationState, step: 'complete', endTime });
-          const msgComplete = '¡Perfecto! Tengo toda la información. Voy a abrir el formulario para que puedas revisar y guardar.';
-          speak(msgComplete);
-          addBotMessage(msgComplete);
-
-          setTimeout(() => {
-            const eventData = {
-              type: conversationState.type!,
-              title: conversationState.title!,
-              startDate: new Date(conversationState.date!),
-              startTime: conversationState.startTime!,
-              endTime: endTime
-            };
-            onEventDataCollected(eventData);
-            setIsOpen(false);
-            resetConversation();
-          }, 2000);
+          setConversationState({ ...conversationState, step: 'location', endTime });
+          const msgLocation = '¿Dónde será? Puedes decirme la ubicación o simplemente di "sin ubicación" o "saltar".';
+          speak(msgLocation);
+          addBotMessage(msgLocation);
         } else {
           const msgError = 'No entendí la hora. Por favor, dímela de nuevo en formato HH:MM';
           speak(msgError);
           addBotMessage(msgError);
         }
+        break;
+
+      case 'location':
+        let location: string | undefined = undefined;
+        if (!lowerInput.includes('sin') && !lowerInput.includes('saltar') && !lowerInput.includes('no')) {
+          location = input;
+        }
+        
+        setConversationState({ ...conversationState, step: 'complete', location });
+        const msgComplete = '¡Perfecto! Tengo toda la información. Voy a abrir el formulario para que puedas revisar y guardar.';
+        speak(msgComplete);
+        addBotMessage(msgComplete);
+
+        setTimeout(() => {
+          const eventData = {
+            type: conversationState.type!,
+            title: conversationState.title!,
+            startDate: new Date(conversationState.date!),
+            startTime: conversationState.startTime!,
+            endTime: conversationState.endTime!,
+            location: location
+          };
+          onEventDataCollected(eventData);
+          setIsOpen(false);
+          resetConversation();
+        }, 2000);
         break;
     }
   };

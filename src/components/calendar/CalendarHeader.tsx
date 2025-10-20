@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Search, Settings, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Search, Settings, Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import SettingsPanel from './SettingsPanel';
 import SearchDialog from './SearchDialog';
@@ -14,10 +15,12 @@ interface CalendarHeaderProps {
   setView: (view: 'month' | 'week' | 'day') => void;
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
+  onEventSelect?: (eventId: string) => void;
 }
 
-const CalendarHeader = ({ view, setView, selectedDate, setSelectedDate }: CalendarHeaderProps) => {
+const CalendarHeader = ({ view, setView, selectedDate, setSelectedDate, onEventSelect }: CalendarHeaderProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
 
@@ -39,7 +42,15 @@ const CalendarHeader = ({ view, setView, selectedDate, setSelectedDate }: Calend
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">OronixOS</h1>
           
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="h-4 w-4" />
+                <span>{user.name || user.email}</span>
+              </div>
+            )}
+            
+            <div className="flex gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -58,6 +69,7 @@ const CalendarHeader = ({ view, setView, selectedDate, setSelectedDate }: Calend
                 <SettingsPanel />
               </SheetContent>
             </Sheet>
+            </div>
           </div>
         </div>
 
@@ -109,7 +121,11 @@ const CalendarHeader = ({ view, setView, selectedDate, setSelectedDate }: Calend
         </div>
       </div>
 
-      <SearchDialog open={showSearch} onOpenChange={setShowSearch} />
+      <SearchDialog 
+        open={showSearch} 
+        onOpenChange={setShowSearch} 
+        onEventSelect={onEventSelect}
+      />
       <AddEventMenu open={showAddMenu} onOpenChange={setShowAddMenu} />
     </header>
   );

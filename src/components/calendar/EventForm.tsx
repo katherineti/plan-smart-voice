@@ -20,6 +20,7 @@ interface EventFormProps {
     startDate?: Date;
     startTime?: string;
     endTime?: string;
+    location?: string;
   };
 }
 
@@ -52,6 +53,7 @@ const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormPr
         startDate: initialData.startDate || prev.startDate,
         startTime: initialData.startTime || prev.startTime,
         endTime: initialData.endTime || prev.endTime,
+        location: initialData.location || prev.location,
       }));
     }
   }, [initialData]);

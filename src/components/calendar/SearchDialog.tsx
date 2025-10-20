@@ -11,12 +11,20 @@ import { Button } from '@/components/ui/button';
 interface SearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEventSelect?: (eventId: string) => void;
 }
 
-const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
+const SearchDialog = ({ open, onOpenChange, onEventSelect }: SearchDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { events } = useEvents();
   const { t } = useLanguage();
+
+  const handleEventClick = (eventId: string) => {
+    if (onEventSelect) {
+      onEventSelect(eventId);
+      onOpenChange(false);
+    }
+  };
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,6 +65,7 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
               key={event.id}
               className="p-3 rounded-lg border hover:bg-accent cursor-pointer"
               style={{ borderLeftColor: event.color, borderLeftWidth: '4px' }}
+              onClick={() => handleEventClick(event.id)}
             >
               <div className="font-medium">{event.title}</div>
               <div className="text-sm text-muted-foreground">
