@@ -37,7 +37,7 @@ const CalendarHeader = ({ view, setView, selectedDate, setSelectedDate }: Calend
     <header className="border-b bg-card">
       <div className="px-4 py-3 space-y-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Planificador Virtual</h1>
+          <h1 className="text-2xl font-bold">OronixOS</h1>
           
           <div className="flex gap-2">
             <Button

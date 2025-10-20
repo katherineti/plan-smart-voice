@@ -10,6 +10,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   signInWithGoogle: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, name: string) => Promise<boolean>;
   signOut: () => void;
   isLoading: boolean;
 }
@@ -30,16 +32,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    // For now, simulate Google login
-    // In production, you'd use Google OAuth SDK
     const mockUser: User = {
-      id: '1',
-      email: 'user@example.com',
-      name: 'Usuario',
+      id: Date.now().toString(),
+      email: 'user@gmail.com',
+      name: 'Usuario Google',
       picture: 'https://via.placeholder.com/150'
     };
     setUser(mockUser);
     localStorage.setItem('user', JSON.stringify(mockUser));
+  };
+
+  const signIn = async (email: string, password: string): Promise<boolean> => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const foundUser = users.find((u: any) => u.email === email && u.password === password);
+    
+    if (foundUser) {
+      const { password: _, ...userWithoutPassword } = foundUser;
+      setUser(userWithoutPassword);
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      return true;
+    }
+    return false;
+  };
+
+  const signUp = async (email: string, password: string, name: string): Promise<boolean> => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    if (users.some((u: any) => u.email === email)) {
+      return false;
+    }
+
+    const newUser = {
+      id: Date.now().toString(),
+      email,
+      password,
+      name,
+      picture: 'https://via.placeholder.com/150'
+    };
+
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+
+    const { password: _, ...userWithoutPassword } = newUser;
+    setUser(userWithoutPassword);
+    localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+    return true;
   };
 
   const signOut = () => {
@@ -48,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, signInWithGoogle, signOut, isLoading }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle, signIn, signUp, signOut, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

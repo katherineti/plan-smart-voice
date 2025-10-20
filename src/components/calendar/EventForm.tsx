@@ -15,26 +15,32 @@ interface EventFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   event?: CalendarEvent;
+  initialData?: {
+    title?: string;
+    startDate?: Date;
+    startTime?: string;
+    endTime?: string;
+  };
 }
 
 const EVENT_COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
 ];
 
-const EventForm = ({ type, open, onOpenChange, event }: EventFormProps) => {
+const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormProps) => {
   const { addEvent, updateEvent } = useEvents();
   const { t } = useLanguage();
   const { user } = useAuth();
   
   const [formData, setFormData] = useState({
-    title: event?.title || '',
+    title: initialData?.title || event?.title || '',
     description: event?.description || '',
     location: event?.location || '',
     color: event?.color || EVENT_COLORS[0],
-    startDate: event?.startDate || new Date(),
+    startDate: initialData?.startDate || event?.startDate || new Date(),
     endDate: event?.endDate || new Date(),
-    startTime: event?.startTime || '09:00',
-    endTime: event?.endTime || '10:00',
+    startTime: initialData?.startTime || event?.startTime || '09:00',
+    endTime: initialData?.endTime || event?.endTime || '10:00',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
