@@ -116,6 +116,19 @@ const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormPr
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="startDate">{t('date')}</Label>
+            <Input
+              id="startDate"
+              type="date"
+              value={formData.startDate instanceof Date 
+                ? formData.startDate.toISOString().split('T')[0] 
+                : formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: new Date(e.target.value) })}
+              required
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startTime">{t('startTime')}</Label>
