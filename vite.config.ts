@@ -12,6 +12,15 @@ export default defineConfig(({ mode }) => ({
   // base: '/plan-smart-voice/',
   base: BASE_PATH,
   // *******************************************************************
+
+  // **************** CLAVE: RENOMBRAR LA CARPETA DE SALIDA ****************
+  // Se fuerza a Vite a generar los archivos en la carpeta 'docs' en lugar de 'dist'.
+  // Esto es necesario porque GitHub Pages solo ve '/root' o '/docs' como carpetas de despliegue.
+  build: {
+    outDir: 'docs', 
+  },
+  // *******************************************************************
+  
   server: {
     host: "::",
     port: 8080,
