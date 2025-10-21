@@ -37,6 +37,11 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
   }>({ step: 'greeting' });
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const conversationStateRef = useRef(conversationState);
+
+  useEffect(() => {
+    conversationStateRef.current = conversationState;
+  }, [conversationState]);
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -49,7 +54,7 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
       recognitionInstance.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         addUserMessage(transcript);
-        processUserInput(transcript);
+        processUserInputWithState(transcript);
         setInputText('');
       };
 
@@ -94,24 +99,25 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
     setMessages(prev => [...prev, { role: 'user', content }]);
   };
 
-  const processUserInput = (input: string) => {
+  const processUserInputWithState = (input: string) => {
+    const currentState = conversationStateRef.current;
     const lowerInput = input.toLowerCase();
 
-    switch (conversationState.step) {
+    switch (currentState.step) {
       case 'greeting':
       case 'type':
         if (lowerInput.includes('evento')) {
-          setConversationState({ ...conversationState, step: 'title', type: 'event' });
+          setConversationState({ ...currentState, step: 'title', type: 'event' });
           const msg = '¡Perfecto! Vamos a crear un evento. ¿Cuál es el título del evento?';
           speak(msg);
           addBotMessage(msg);
         } else if (lowerInput.includes('tarea')) {
-          setConversationState({ ...conversationState, step: 'title', type: 'task' });
+          setConversationState({ ...currentState, step: 'title', type: 'task' });
           const msg = '¡Genial! Vamos a crear una tarea. ¿Cuál es el título de la tarea?';
           speak(msg);
           addBotMessage(msg);
         } else if (lowerInput.includes('cumpleaño')) {
-          setConversationState({ ...conversationState, step: 'title', type: 'birthday' });
+          setConversationState({ ...currentState, step: 'title', type: 'birthday' });
           const msg = '¡Excelente! Vamos a crear un cumpleaños. ¿De quién es el cumpleaños?';
           speak(msg);
           addBotMessage(msg);
@@ -123,7 +129,7 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
         break;
 
       case 'title':
-        setConversationState({ ...conversationState, step: 'date', title: input });
+        setConversationState({ ...currentState, step: 'date', title: input });
         const msgDate = '¿Para qué fecha? Dime la fecha en formato día/mes/año o solo el día si es para este mes.';
         speak(msgDate);
         addBotMessage(msgDate);
@@ -132,7 +138,7 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
       case 'date':
         const parsedDate = parseDate(input);
         if (parsedDate) {
-          setConversationState({ ...conversationState, step: 'startTime', date: parsedDate });
+          setConversationState({ ...currentState, step: 'startTime', date: parsedDate });
           const msgStart = '¿A qué hora inicia? Por ejemplo: 9:00 o 14:30';
           speak(msgStart);
           addBotMessage(msgStart);
@@ -146,7 +152,7 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
       case 'startTime':
         const startTime = parseTime(input);
         if (startTime) {
-          setConversationState({ ...conversationState, step: 'endTime', startTime });
+          setConversationState({ ...currentState, step: 'endTime', startTime });
           const msgEnd = '¿A qué hora termina? Por ejemplo: 10:00 o 16:30';
           speak(msgEnd);
           addBotMessage(msgEnd);
@@ -160,7 +166,7 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
       case 'endTime':
         const endTime = parseTime(input);
         if (endTime) {
-          setConversationState({ ...conversationState, step: 'location', endTime });
+          setConversationState({ ...currentState, step: 'location', endTime });
           const msgLocation = '¿Dónde será? Puedes decirme la ubicación o simplemente di "sin ubicación" o "saltar".';
           speak(msgLocation);
           addBotMessage(msgLocation);
@@ -177,18 +183,19 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
           location = input;
         }
         
-        setConversationState({ ...conversationState, step: 'complete', location });
+        setConversationState({ ...currentState, step: 'complete', location });
         const msgComplete = '¡Perfecto! Tengo toda la información. Voy a abrir el formulario para que puedas revisar y guardar.';
         speak(msgComplete);
         addBotMessage(msgComplete);
 
         setTimeout(() => {
+          const currentStateData = conversationStateRef.current;
           const eventData = {
-            type: conversationState.type!,
-            title: conversationState.title!,
-            startDate: new Date(conversationState.date!),
-            startTime: conversationState.startTime!,
-            endTime: conversationState.endTime!,
+            type: currentStateData.type!,
+            title: currentStateData.title!,
+            startDate: new Date(currentStateData.date!),
+            startTime: currentStateData.startTime!,
+            endTime: currentStateData.endTime!,
             location: location
           };
           onEventDataCollected(eventData);
@@ -279,7 +286,8 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
 
   const handleSendMessage = () => {
     if (inputText.trim()) {
-      processUserInput(inputText);
+      addUserMessage(inputText);
+      processUserInputWithState(inputText);
       setInputText('');
     }
   };
