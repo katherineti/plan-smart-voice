@@ -8,21 +8,23 @@ import Chatbot from '@/components/chat/Chatbot';
 import EventForm from '@/components/calendar/EventForm';
 import EventDetailsDialog from '@/components/calendar/EventDetailsDialog';
 import { useEvents } from '@/contexts/EventsContext';
+import { useNotifications } from '@/hooks/useNotifications';
 import type { EventType } from '@/types/event';
 
 type View = 'month' | 'week' | 'day';
 
 const Calendar = () => {
   const { events } = useEvents();
+  useNotifications(); // Enable notification system
   const [view, setView] = useState<View>('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [eventFormOpen, setEventFormOpen] = useState(false);
   const [eventFormData, setEventFormData] = useState<{
     type: EventType;
-    title: string;
-    startDate: Date;
-    startTime: string;
-    endTime: string;
+    title?: string;
+    startDate?: Date;
+    startTime?: string;
+    endTime?: string;
     location?: string;
   } | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -43,6 +45,22 @@ const Calendar = () => {
     setSelectedEventId(eventId);
   };
 
+  const handleDateTimeClick = (date: Date, time?: string) => {
+    setEventFormData({
+      type: 'event',
+      startDate: date,
+      startTime: time || '09:00',
+      endTime: time ? addHour(time) : '10:00'
+    });
+    setEventFormOpen(true);
+  };
+
+  const addHour = (time: string): string => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const newHours = (hours + 1) % 24;
+    return `${newHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   const selectedEvent = events.find(e => e.id === selectedEventId);
 
   return (
@@ -56,9 +74,9 @@ const Calendar = () => {
       />
       
       <div className="flex-1 overflow-hidden">
-        {view === 'month' && <MonthView selectedDate={selectedDate} setSelectedDate={setSelectedDate} />}
-        {view === 'week' && <WeekView selectedDate={selectedDate} />}
-        {view === 'day' && <DayView selectedDate={selectedDate} />}
+        {view === 'month' && <MonthView selectedDate={selectedDate} setSelectedDate={setSelectedDate} onDateClick={handleDateTimeClick} />}
+        {view === 'week' && <WeekView selectedDate={selectedDate} onDateTimeClick={handleDateTimeClick} />}
+        {view === 'day' && <DayView selectedDate={selectedDate} onDateTimeClick={handleDateTimeClick} />}
       </div>
 
       <VoiceButton />
@@ -72,13 +90,7 @@ const Calendar = () => {
             setEventFormOpen(open);
             if (!open) setEventFormData(null);
           }}
-          initialData={{
-            title: eventFormData.title,
-            startDate: eventFormData.startDate,
-            startTime: eventFormData.startTime,
-            endTime: eventFormData.endTime,
-            location: eventFormData.location
-          }}
+          initialData={eventFormData}
         />
       )}
 

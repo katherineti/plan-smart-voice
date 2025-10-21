@@ -7,9 +7,10 @@ import type { CalendarEvent } from '@/types/event';
 
 interface WeekViewProps {
   selectedDate: Date;
+  onDateTimeClick?: (date: Date, time?: string) => void;
 }
 
-const WeekView = ({ selectedDate }: WeekViewProps) => {
+const WeekView = ({ selectedDate, onDateTimeClick }: WeekViewProps) => {
   const { events } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -50,11 +51,23 @@ const WeekView = ({ selectedDate }: WeekViewProps) => {
               });
 
               return (
-                <div key={day.toISOString()} className="border-l p-1 relative">
+                <div 
+                  key={day.toISOString()} 
+                  className="border-l p-1 relative cursor-pointer hover:bg-accent transition-colors"
+                  onClick={() => {
+                    if (dayEvents.length === 0 && onDateTimeClick) {
+                      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+                      onDateTimeClick(day, timeString);
+                    }
+                  }}
+                >
                   {dayEvents.map(event => (
                     <div
                       key={event.id}
-                      onClick={() => setSelectedEvent(event)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEvent(event);
+                      }}
                       className="text-xs p-2 rounded cursor-pointer mb-1"
                       style={{ backgroundColor: event.color, color: '#fff' }}
                     >

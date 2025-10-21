@@ -7,9 +7,10 @@ import type { CalendarEvent } from '@/types/event';
 
 interface DayViewProps {
   selectedDate: Date;
+  onDateTimeClick?: (date: Date, time?: string) => void;
 }
 
-const DayView = ({ selectedDate }: DayViewProps) => {
+const DayView = ({ selectedDate, onDateTimeClick }: DayViewProps) => {
   const { events } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -36,11 +37,22 @@ const DayView = ({ selectedDate }: DayViewProps) => {
               <div className="w-20 p-2 text-sm text-muted-foreground">
                 {format(new Date().setHours(hour, 0), 'HH:mm')}
               </div>
-              <div className="flex-1 p-2 space-y-2">
+              <div 
+                className="flex-1 p-2 space-y-2 cursor-pointer hover:bg-accent transition-colors"
+                onClick={() => {
+                  if (hourEvents.length === 0 && onDateTimeClick) {
+                    const timeString = `${hour.toString().padStart(2, '0')}:00`;
+                    onDateTimeClick(selectedDate, timeString);
+                  }
+                }}
+              >
                 {hourEvents.map(event => (
                   <div
                     key={event.id}
-                    onClick={() => setSelectedEvent(event)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedEvent(event);
+                    }}
                     className="p-3 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: event.color, color: '#fff' }}
                   >

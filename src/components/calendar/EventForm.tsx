@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEvents } from '@/contexts/EventsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { X } from 'lucide-react';
-import type { EventType, CalendarEvent } from '@/types/event';
+import { X, Plus, Trash2 } from 'lucide-react';
+import type { EventType, CalendarEvent, EventNotification } from '@/types/event';
 
 interface EventFormProps {
   type: EventType;
@@ -36,13 +37,17 @@ const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormPr
   const [formData, setFormData] = useState({
     title: initialData?.title || event?.title || '',
     description: event?.description || '',
-    location: event?.location || '',
+    location: initialData?.location || event?.location || '',
     color: event?.color || EVENT_COLORS[0],
     startDate: initialData?.startDate || event?.startDate || new Date(),
     endDate: event?.endDate || new Date(),
     startTime: initialData?.startTime || event?.startTime || '09:00',
     endTime: initialData?.endTime || event?.endTime || '10:00',
   });
+
+  const [notifications, setNotifications] = useState<EventNotification[]>(
+    event?.notifications || []
+  );
 
   // Update form data when initialData changes (from chatbot)
   useEffect(() => {
@@ -58,13 +63,27 @@ const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormPr
     }
   }, [initialData]);
 
+  const addNotification = () => {
+    setNotifications([...notifications, { type: 'push', minutesBefore: 15 }]);
+  };
+
+  const removeNotification = (index: number) => {
+    setNotifications(notifications.filter((_, i) => i !== index));
+  };
+
+  const updateNotification = (index: number, field: 'minutesBefore', value: number) => {
+    setNotifications(notifications.map((notif, i) => 
+      i === index ? { ...notif, [field]: value } : notif
+    ));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const eventData = {
       ...formData,
       type,
-      notifications: [],
+      notifications,
       userId: user?.id || '1'
     };
 
@@ -165,6 +184,50 @@ const EventForm = ({ type, open, onOpenChange, event, initialData }: EventFormPr
                 />
               ))}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Notificaciones</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addNotification}>
+                <Plus className="h-4 w-4 mr-1" />
+                Agregar
+              </Button>
+            </div>
+            {notifications.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No hay notificaciones programadas</p>
+            ) : (
+              <div className="space-y-2">
+                {notifications.map((notification, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Select
+                      value={notification.minutesBefore.toString()}
+                      onValueChange={(value) => updateNotification(index, 'minutesBefore', parseInt(value))}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5 minutos antes</SelectItem>
+                        <SelectItem value="15">15 minutos antes</SelectItem>
+                        <SelectItem value="30">30 minutos antes</SelectItem>
+                        <SelectItem value="60">1 hora antes</SelectItem>
+                        <SelectItem value="120">2 horas antes</SelectItem>
+                        <SelectItem value="1440">1 día antes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeNotification(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">

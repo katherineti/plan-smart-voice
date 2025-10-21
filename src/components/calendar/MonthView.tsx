@@ -8,9 +8,10 @@ import type { CalendarEvent } from '@/types/event';
 interface MonthViewProps {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
+  onDateClick?: (date: Date, time?: string) => void;
 }
 
-const MonthView = ({ selectedDate, setSelectedDate }: MonthViewProps) => {
+const MonthView = ({ selectedDate, setSelectedDate, onDateClick }: MonthViewProps) => {
   const { events } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -45,7 +46,12 @@ const MonthView = ({ selectedDate, setSelectedDate }: MonthViewProps) => {
           return (
             <div
               key={index}
-              onClick={() => setSelectedDate(day)}
+              onClick={() => {
+                setSelectedDate(day);
+                if (onDateClick && dayEvents.length === 0) {
+                  onDateClick(day);
+                }
+              }}
               className={`bg-card p-2 min-h-[100px] cursor-pointer hover:bg-accent transition-colors ${
                 !isCurrentMonth ? 'opacity-50' : ''
               }`}
