@@ -78,8 +78,9 @@ const Calendar = () => {
         {view === 'week' && <WeekView selectedDate={selectedDate} onDateTimeClick={handleDateTimeClick} />}
         {view === 'day' && <DayView selectedDate={selectedDate} onDateTimeClick={handleDateTimeClick} />}
       </div>
-
-      <VoiceButton />
+      
+{/* se comento el boton de microfono*/}
+     {/* <VoiceButton /> */}
       <Chatbot onEventDataCollected={handleEventDataCollected} />
       
       {eventFormData && (

@@ -74,7 +74,9 @@ const Login = () => {
         <div className="flex justify-center mb-6">
           <div className="relative">
             <Mountain className="h-20 w-20 text-primary" />
+            {/* <img src='/public/favicon.ico' alt='logo' className='h-10 w-10 text-secondary absolute -bottom-2 -right-2' /> */}
             <Calendar className="h-10 w-10 text-secondary absolute -bottom-2 -right-2" />
+            {/* <img src='/public/favicon.ico' alt='logo' className='h-10 w-10 text-secondary absolute -bottom-2 -right-2' /> */}
           </div>
         </div>
         
