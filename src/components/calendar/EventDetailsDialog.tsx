@@ -48,12 +48,7 @@ const EventDetailsDialog = ({ event, open, onOpenChange }: EventDetailsDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Detalles del {t(event.type)}</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle>Detalles del {t(event.type)}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">

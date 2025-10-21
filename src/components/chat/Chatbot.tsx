@@ -190,10 +190,14 @@ const Chatbot = ({ onEventDataCollected }: ChatbotProps) => {
 
         setTimeout(() => {
           const currentStateData = conversationStateRef.current;
+          // Parse date correctly to avoid timezone issues
+          const [year, month, day] = currentStateData.date!.split('-').map(Number);
+          const localDate = new Date(year, month - 1, day);
+          
           const eventData = {
             type: currentStateData.type!,
             title: currentStateData.title!,
-            startDate: new Date(currentStateData.date!),
+            startDate: localDate,
             startTime: currentStateData.startTime!,
             endTime: currentStateData.endTime!,
             location: location
