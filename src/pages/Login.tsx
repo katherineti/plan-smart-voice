@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Mountain } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { BASE_PATH } from "./../../const";
 
 const Login = () => {
   const { user, signInWithGoogle, signIn, signUp } = useAuth();
@@ -85,7 +86,8 @@ const Login = () => {
         {/* IMAGEN ACTUALIZADA*/}
         <div className="flex justify-center mb-6">
           <div className="relative p-2">
-            <img src='/favicon.ico' alt='logo' className='h-24 w-24 rounded-xl shadow-inner' />
+            {/* <img src='plan-smart-voice/favicon.ico' alt='logo' className='h-24 w-24 rounded-xl shadow-inner' /> */}
+            <img src={`${BASE_PATH}favicon.ico`} alt='logo' className='h-24 w-24 rounded-xl shadow-inner' />
           </div>
         </div>
         

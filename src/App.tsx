@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Login from "./pages/Login";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
+import { BASE_PATH } from "./../const";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      {/* CLAVE: Se añade el 'basename' para que React Router funcione en el subdirectorio 
+        ('/plan-smart-voice/') tanto en 'npm run preview' como en GitHub Pages.
+      */}
+      {/* <BrowserRouter basename="/plan-smart-voice"> */}
+      <BrowserRouter basename={BASE_PATH}>
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
