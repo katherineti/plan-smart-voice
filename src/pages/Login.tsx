@@ -85,7 +85,7 @@ const Login = () => {
         {/* IMAGEN ACTUALIZADA*/}
         <div className="flex justify-center mb-6">
           <div className="relative p-2">
-            <img src='/public/favicon.ico' alt='logo' className='h-24 w-24 rounded-xl shadow-inner' />
+            <img src='/favicon.ico' alt='logo' className='h-24 w-24 rounded-xl shadow-inner' />
           </div>
         </div>
         
